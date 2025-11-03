@@ -13,6 +13,27 @@ local hum = char:WaitForChild("Humanoid")
 local httpservice = game:GetService("HttpService")
 local tspmo = game:GetService("TweenService")
 
+-- Создаем 3 платформы при запуске
+local partsData = {
+    {name="SigmaPart", shape=Enum.PartType.Wedge, pos=Vector3.new(-122,-28,-193), size=Vector3.new(4,30,25), ori=Vector3.new(0,180,0)},
+    {name="SigmaPart2", shape=Enum.PartType.Wedge, pos=Vector3.new(-202,5,-616), size=Vector3.new(4,30,25), ori=Vector3.new(0,200,0)},
+    {name="SigmaPart3", pos=Vector3.new(-214,18,-627), size=Vector3.new(12,1,12)},
+    {name="SigmaPart4", shape=Enum.PartType.Wedge, pos=Vector3.new(-44,-104,-392), size=Vector3.new(6,20,17)},
+    {name="SigmaPart5", pos=Vector3.new(-45,-94,-374), size=Vector3.new(13,1,13)},
+}
+
+for _, data in ipairs(partsData) do
+    local p = Instance.new("Part")
+    p.Name = data.name
+    p.Parent = workspace
+    p.Anchored = true
+    p.Color = Color3.fromRGB(255, 0, 0)
+    p.Transparency = 0.3
+    if data.shape then p.Shape = data.shape end
+    if data.ori then p.Orientation = data.ori end
+    p.Position, p.Size = data.pos, data.size
+end
+
 local function ClearOldBoardsAndHelpers()
     local b = workspace:FindFirstChild("Board")
     if b then b:Destroy() end
@@ -63,26 +84,9 @@ local function CreateWideStick(group, parent, name)
     part.CFrame = CFrame.new(midPoint, midPoint + direction)
 end
 
-local function LoadTweensConfig_CreateVisuals()
-    local groups = {
-        {
-            Vector3.new(-126.3696, -31.9996, -193.4935),
-            Vector3.new(-125.4963, -27.6570, -197.6518),
-            Vector3.new(-125.5180, -20.3162, -197.8057),
-            Vector3.new(-124.5315, -6.9844, -207.8662),
-        },
-        {
-            Vector3.new(-202.3378, 4.8070, -622.1143),
-            Vector3.new(-206.2624, 17.9093, -624.6749),
-            Vector3.new(-210.2882, 22.7560, -625.7983),
-        },
-        {
-            Vector3.new(-52.6669, -120.2267, -393.7919),
-            Vector3.new(-45.2733, -95.8739, -384.5992),
-            Vector3.new(-43.7066, -89.2775, -380.1008),
-        },
-        {
-           Vector3.new(-147.6, -34.3, -114.5),
+-- ВСТРОЕННЫЕ ТОЧКИ МАРШРУТА
+local BUILT_IN_POINTS = {
+    Vector3.new(-147.6, -34.3, -114.5),
     Vector3.new(-144.8, -35.0, -125.0),
     Vector3.new(-142.1, -35.2, -134.9),
     Vector3.new(-139.4, -35.1, -145.1),
@@ -90,25 +94,12 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-137.9, -35.0, -162.1),
     Vector3.new(-141.8, -34.9, -164.0),
     Vector3.new(-150.8, -33.1, -166.1),
-    Vector3.new(-142.1, -34.8, -164.1),
-    Vector3.new(-150.5, -33.3, -166.1),
-    Vector3.new(-141.5, -34.9, -164.0),
-    Vector3.new(-151.1, -32.8, -166.2),
-    Vector3.new(-140.2, -35.0, -163.8),
-    Vector3.new(-150.3, -33.2, -166.2),
-    Vector3.new(-138.6, -35.0, -163.4),
     Vector3.new(-129.5, -35.0, -167.4),
     Vector3.new(-119.5, -35.0, -173.6),
     Vector3.new(-113.1, -33.6, -175.9),
     Vector3.new(-107.7, -28.2, -178.1),
     Vector3.new(-103.0, -25.7, -183.4),
     Vector3.new(-109.3, -26.6, -190.8),
-    Vector3.new(-102.7, -25.5, -183.0),
-    Vector3.new(-109.5, -26.6, -191.0),
-    Vector3.new(-103.1, -25.6, -183.5),
-    Vector3.new(-108.9, -26.6, -190.3),
-    Vector3.new(-103.5, -25.7, -184.0),
-    Vector3.new(-110.9, -26.5, -190.0),
     Vector3.new(-116.9, -26.1, -191.1),
     Vector3.new(-119.9, -26.7, -191.3),
     Vector3.new(-122.3, -23.9, -194.4),
@@ -117,13 +108,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-122.4, -6.4, -207.8),
     Vector3.new(-128.0, -6.4, -209.4),
     Vector3.new(-134.9, -6.5, -207.0),
-    Vector3.new(-127.8, -6.6, -209.2),
-    Vector3.new(-121.6, -5.9, -208.8),
-    Vector3.new(-128.0, -6.6, -209.2),
-    Vector3.new(-135.2, -6.8, -206.2),
-    Vector3.new(-129.8, -5.9, -210.3),
-    Vector3.new(-121.8, -5.4, -209.8),
-    Vector3.new(-134.3, -6.6, -207.4),
     Vector3.new(-126.1, -4.6, -213.1),
     Vector3.new(-116.1, -3.0, -219.8),
     Vector3.new(-104.9, -3.0, -225.4),
@@ -184,38 +168,15 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(589.9, -3.4, -386.2),
     Vector3.new(600.5, -4.9, -383.1),
     Vector3.new(617.4, -7.2, -386.4),
-    Vector3.new(606.9, -5.6, -384.0),
-    Vector3.new(618.4, -7.2, -386.6),
-    Vector3.new(607.0, -6.0, -383.9),
-    Vector3.new(616.7, -7.2, -386.2),
-    Vector3.new(606.8, -5.6, -383.8),
-    Vector3.new(618.4, -7.2, -386.5),
     Vector3.new(623.6, -7.7, -381.3),
     Vector3.new(633.5, -7.3, -377.1),
     Vector3.new(639.4, -6.5, -367.9),
-    Vector3.new(636.7, -7.0, -379.4),
-    Vector3.new(639.2, -6.6, -368.6),
-    Vector3.new(636.6, -6.9, -379.8),
-    Vector3.new(639.4, -6.7, -367.7),
-    Vector3.new(636.6, -6.9, -379.4),
-    Vector3.new(639.0, -6.8, -369.0),
     Vector3.new(634.9, -7.0, -362.1),
     Vector3.new(630.6, -6.1, -356.8),
     Vector3.new(626.4, -6.9, -355.9),
     Vector3.new(617.7, -7.4, -353.9),
-    Vector3.new(627.8, -6.7, -356.3),
-    Vector3.new(617.1, -7.3, -353.8),
-    Vector3.new(627.8, -6.5, -356.3),
-    Vector3.new(618.2, -7.5, -354.1),
-    Vector3.new(627.4, -6.7, -356.3),
-    Vector3.new(616.0, -7.3, -353.7),
     Vector3.new(604.8, -7.2, -354.1),
     Vector3.new(612.3, -7.3, -350.2),
-    Vector3.new(605.6, -7.2, -353.8),
-    Vector3.new(612.2, -7.1, -349.8),
-    Vector3.new(605.4, -7.1, -352.8),
-    Vector3.new(612.4, -6.9, -349.6),
-    Vector3.new(604.0, -7.4, -355.8),
     Vector3.new(599.4, -8.7, -366.3),
     Vector3.new(595.1, -7.4, -374.9),
     Vector3.new(590.6, -3.4, -382.7),
@@ -244,14 +205,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(685.1, 84.3, -399.8),
     Vector3.new(687.9, 87.4, -392.2),
     Vector3.new(684.6, 82.9, -387.0),
-    Vector3.new(690.4, 88.1, -391.8),
-    Vector3.new(686.1, 85.4, -397.5),
-    Vector3.new(691.4, 89.4, -390.1),
-    Vector3.new(686.9, 86.0, -388.1),
-    Vector3.new(691.3, 88.4, -393.9),
-    Vector3.new(685.4, 85.2, -398.4),
-    Vector3.new(690.5, 88.4, -390.2),
-    Vector3.new(686.9, 87.0, -387.3),
     Vector3.new(682.4, 81.1, -383.9),
     Vector3.new(679.4, 80.0, -376.7),
     Vector3.new(673.8, 76.3, -369.4),
@@ -279,14 +232,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(682.8, 32.9, -180.4),
     Vector3.new(672.6, 32.9, -179.8),
     Vector3.new(662.9, 32.7, -184.2),
-    Vector3.new(668.6, 33.7, -192.4),
-    Vector3.new(659.7, 32.0, -186.9),
-    Vector3.new(668.0, 33.6, -192.0),
-    Vector3.new(659.4, 32.0, -186.6),
-    Vector3.new(668.9, 33.9, -192.4),
-    Vector3.new(658.9, 31.8, -186.3),
-    Vector3.new(668.0, 33.5, -191.8),
-    Vector3.new(658.2, 31.5, -185.8),
     Vector3.new(653.5, 31.0, -182.8),
     Vector3.new(643.8, 28.9, -177.4),
     Vector3.new(632.2, 32.2, -180.1),
@@ -372,14 +317,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-205.8, 20.6, -625.8),
     Vector3.new(-209.5, 21.5, -629.3),
     Vector3.new(-215.9, 21.5, -626.0),
-    Vector3.new(-209.0, 21.5, -629.7),
-    Vector3.new(-216.3, 21.5, -625.8),
-    Vector3.new(-208.9, 21.5, -629.7),
-    Vector3.new(-216.3, 21.5, -625.7),
-    Vector3.new(-209.3, 21.5, -629.4),
-    Vector3.new(-216.8, 21.5, -625.4),
-    Vector3.new(-210.4, 21.5, -628.8),
-    Vector3.new(-208.3, 21.5, -630.9),
     Vector3.new(-203.1, 5.6, -633.6),
     Vector3.new(-202.1, -1.2, -638.3),
     Vector3.new(-209.1, -3.0, -644.9),
@@ -412,13 +349,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-394.1, -42.8, -556.5),
     Vector3.new(-384.1, -43.5, -558.8),
     Vector3.new(-377.3, -43.7, -554.7),
-    Vector3.new(-379.9, -43.3, -563.8),
-    Vector3.new(-377.5, -43.6, -555.4),
-    Vector3.new(-379.9, -43.2, -564.0),
-    Vector3.new(-377.6, -43.6, -555.9),
-    Vector3.new(-379.7, -43.3, -563.9),
-    Vector3.new(-377.2, -43.7, -554.8),
-    Vector3.new(-379.8, -43.2, -564.0),
     Vector3.new(-369.3, -44.0, -561.8),
     Vector3.new(-357.8, -46.8, -563.5),
     Vector3.new(-348.4, -47.0, -565.6),
@@ -450,22 +380,12 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-198.0, -63.1, -620.5),
     Vector3.new(-206.6, -61.2, -622.1),
     Vector3.new(-212.0, -59.8, -631.7),
-    Vector3.new(-207.6, -61.7, -624.3),
-    Vector3.new(-210.3, -60.1, -630.5),
-    Vector3.new(-206.9, -61.7, -624.0),
-    Vector3.new(-209.8, -60.4, -629.8),
-    Vector3.new(-206.4, -61.5, -623.4),
-    Vector3.new(-208.7, -60.4, -629.1),
-    Vector3.new(-204.6, -61.3, -623.2),
-    Vector3.new(-208.6, -60.3, -629.8),
-    Vector3.new(-204.0, -61.3, -622.9),
     Vector3.new(-195.5, -63.5, -621.1),
     Vector3.new(-187.9, -63.5, -619.4),
     Vector3.new(-179.0, -64.3, -606.0),
     Vector3.new(-175.8, -63.6, -595.0),
     Vector3.new(-174.4, -64.0, -580.4),
     Vector3.new(-174.4, -63.4, -567.6),
-    Vector3.new(-174.5, -63.3, -556.7),
     Vector3.new(-174.5, -63.3, -556.7),
     Vector3.new(-171.8, -64.3, -545.3),
     Vector3.new(-167.8, -63.4, -536.2),
@@ -499,19 +419,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-292.0, -79.0, -363.0),
     Vector3.new(-298.9, -79.0, -368.3),
     Vector3.new(-308.2, -79.0, -372.8),
-    Vector3.new(-299.3, -79.0, -368.5),
-    Vector3.new(-308.2, -79.0, -372.7),
-    Vector3.new(-300.8, -79.0, -369.1),
-    Vector3.new(-307.5, -79.0, -372.3),
-    Vector3.new(-299.5, -79.0, -368.4),
-    Vector3.new(-308.3, -79.0, -372.6),
-    Vector3.new(-300.3, -79.0, -368.7),
-    Vector3.new(-308.6, -79.0, -372.7),
-    Vector3.new(-300.7, -79.0, -368.8),
-    Vector3.new(-308.0, -79.0, -372.3),
-    Vector3.new(-298.5, -79.0, -367.6),
-    Vector3.new(-308.7, -79.0, -372.5),
-    Vector3.new(-296.0, -79.0, -366.4),
     Vector3.new(-283.6, -79.0, -357.8),
     Vector3.new(-270.8, -79.0, -345.5),
     Vector3.new(-260.0, -79.0, -336.4),
@@ -522,24 +429,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-230.0, -79.8, -273.2),
     Vector3.new(-230.3, -83.0, -257.4),
     Vector3.new(-240.7, -83.0, -249.4),
-    Vector3.new(-239.9, -82.0, -244.1),
-    Vector3.new(-243.2, -83.0, -249.2),
-    Vector3.new(-240.7, -83.1, -245.3),
-    Vector3.new(-243.6, -83.1, -249.8),
-    Vector3.new(-240.2, -82.2, -244.6),
-    Vector3.new(-243.5, -83.0, -249.7),
-    Vector3.new(-240.1, -81.8, -244.5),
-    Vector3.new(-243.4, -83.0, -249.8),
-    Vector3.new(-240.5, -82.2, -245.3),
-    Vector3.new(-242.0, -83.0, -247.7),
-    Vector3.new(-241.2, -83.1, -246.4),
-    Vector3.new(-242.8, -83.1, -249.1),
-    Vector3.new(-240.7, -82.4, -245.8),
-    Vector3.new(-242.9, -83.0, -249.3),
-    Vector3.new(-239.9, -81.5, -244.6),
-    Vector3.new(-241.9, -83.0, -247.7),
-    Vector3.new(-240.0, -81.7, -244.6),
-    Vector3.new(-242.6, -83.0, -248.6),
     Vector3.new(-233.9, -83.0, -252.1),
     Vector3.new(-221.3, -83.2, -253.7),
     Vector3.new(-209.3, -86.5, -254.5),
@@ -574,19 +463,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-191.5, -103.1, -478.6),
     Vector3.new(-190.1, -103.6, -468.8),
     Vector3.new(-188.8, -104.2, -459.9),
-    Vector3.new(-192.2, -103.9, -456.5),
-    Vector3.new(-186.0, -102.8, -455.9),
-    Vector3.new(-193.1, -103.5, -456.5),
-    Vector3.new(-185.9, -103.1, -455.9),
-    Vector3.new(-193.0, -103.6, -456.6),
-    Vector3.new(-185.9, -103.1, -456.0),
-    Vector3.new(-192.5, -103.6, -456.6),
-    Vector3.new(-186.1, -102.9, -456.2),
-    Vector3.new(-191.7, -103.8, -456.7),
-    Vector3.new(-186.6, -103.2, -456.4),
-    Vector3.new(-191.6, -103.8, -456.8),
-    Vector3.new(-185.7, -103.0, -456.3),
-    Vector3.new(-188.9, -104.1, -461.9),
     Vector3.new(-190.8, -103.5, -472.8),
     Vector3.new(-192.7, -103.0, -484.0),
     Vector3.new(-193.2, -103.3, -495.6),
@@ -615,35 +491,10 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(22.9, -99.0, -385.3),
     Vector3.new(20.4, -99.0, -381.4),
     Vector3.new(25.6, -99.0, -372.5),
-    Vector3.new(20.9, -99.0, -381.3),
-    Vector3.new(24.7, -99.0, -372.1),
-    Vector3.new(20.9, -99.0, -379.8),
-    Vector3.new(24.8, -99.0, -373.2),
-    Vector3.new(20.5, -99.0, -380.8),
-    Vector3.new(23.6, -99.0, -374.3),
-    Vector3.new(20.2, -99.0, -381.2),
-    Vector3.new(24.1, -99.0, -373.0),
-    Vector3.new(20.6, -99.0, -380.3),
-    Vector3.new(27.5, -99.0, -373.7),
     Vector3.new(34.2, -99.2, -372.4),
     Vector3.new(40.6, -99.0, -366.2),
-    Vector3.new(33.1, -99.1, -373.3),
-    Vector3.new(39.4, -99.0, -367.3),
-    Vector3.new(34.2, -99.2, -372.2),
-    Vector3.new(39.1, -99.0, -367.4),
-    Vector3.new(32.9, -99.1, -373.3),
-    Vector3.new(39.8, -99.0, -366.7),
-    Vector3.new(32.1, -99.1, -374.0),
-    Vector3.new(40.9, -99.0, -365.6),
     Vector3.new(49.7, -99.3, -357.2),
     Vector3.new(56.4, -98.9, -361.9),
-    Vector3.new(50.9, -99.4, -356.2),
-    Vector3.new(57.0, -98.9, -362.6),
-    Vector3.new(51.4, -99.2, -356.8),
-    Vector3.new(55.6, -99.0, -361.2),
-    Vector3.new(50.7, -99.3, -356.1),
-    Vector3.new(56.5, -98.9, -362.3),
-    Vector3.new(51.4, -98.9, -357.0),
     Vector3.new(50.6, -99.0, -365.0),
     Vector3.new(46.9, -99.0, -365.3),
     Vector3.new(36.2, -99.1, -369.2),
@@ -677,15 +528,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-31.2, -73.0, -413.0),
     Vector3.new(-26.8, -73.1, -421.4),
     Vector3.new(-24.2, -73.2, -434.6),
-    Vector3.new(-26.2, -73.1, -421.7),
-    Vector3.new(-24.5, -73.2, -433.8),
-    Vector3.new(-26.3, -73.1, -421.8),
-    Vector3.new(-24.6, -73.2, -433.4),
-    Vector3.new(-26.2, -73.1, -423.1),
-    Vector3.new(-24.6, -73.2, -434.1),
-    Vector3.new(-26.2, -73.1, -423.2),
-    Vector3.new(-24.6, -73.2, -434.1),
-    Vector3.new(-26.9, -72.9, -419.1),
     Vector3.new(-33.8, -72.9, -411.3),
     Vector3.new(-32.5, -73.1, -397.8),
     Vector3.new(-32.5, -76.3, -386.6),
@@ -727,12 +569,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(1.1, -83.0, -101.7),
     Vector3.new(1.4, -83.0, -92.7),
     Vector3.new(-1.6, -83.0, -77.7),
-    Vector3.new(0.5, -83.0, -88.3),
-    Vector3.new(-1.5, -83.0, -78.4),
-    Vector3.new(0.4, -83.0, -88.1),
-    Vector3.new(-1.9, -83.0, -77.3),
-    Vector3.new(0.4, -83.0, -88.6),
-    Vector3.new(-1.5, -83.0, -77.0),
     Vector3.new(1.5, -82.1, -71.0),
     Vector3.new(3.8, -79.3, -62.6),
     Vector3.new(18.4, -75.0, -44.2),
@@ -751,14 +587,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(128.4, -75.0, 20.7),
     Vector3.new(140.8, -75.0, 27.0),
     Vector3.new(151.8, -75.0, 27.6),
-    Vector3.new(142.0, -75.0, 27.0),
-    Vector3.new(151.4, -75.0, 27.5),
-    Vector3.new(141.5, -75.0, 27.0),
-    Vector3.new(151.9, -75.0, 27.5),
-    Vector3.new(141.4, -75.0, 26.9),
-    Vector3.new(152.3, -75.0, 27.4),
-    Vector3.new(142.3, -75.0, 26.9),
-    Vector3.new(152.2, -75.0, 27.4),
     Vector3.new(136.1, -75.0, 26.6),
     Vector3.new(117.4, -75.0, 20.7),
     Vector3.new(106.4, -75.0, 16.9),
@@ -791,14 +619,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-33.5, -91.2, -33.0),
     Vector3.new(-28.5, -91.2, -23.0),
     Vector3.new(-20.2, -91.1, -9.7),
-    Vector3.new(-15.8, -91.2, -10.5),
-    Vector3.new(-23.9, -91.5, -8.3),
-    Vector3.new(-15.8, -91.2, -10.9),
-    Vector3.new(-24.6, -91.7, -8.8),
-    Vector3.new(-16.1, -91.2, -11.8),
-    Vector3.new(-24.3, -91.7, -9.6),
-    Vector3.new(-16.6, -91.2, -12.2),
-    Vector3.new(-24.7, -91.6, -10.0),
     Vector3.new(-25.1, -91.2, -22.3),
     Vector3.new(-29.2, -91.2, -27.0),
     Vector3.new(-37.1, -91.2, -34.9),
@@ -816,7 +636,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-163.3, -95.3, -84.6),
     Vector3.new(-175.1, -95.2, -94.1),
     Vector3.new(-184.4, -95.2, -101.5),
-    Vector3.new(-184.9, -95.3, -101.9),
     Vector3.new(-199.2, -95.3, -113.4),
     Vector3.new(-208.9, -95.2, -121.2),
     Vector3.new(-218.1, -95.4, -127.8),
@@ -827,23 +646,11 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-269.3, -99.6, -84.6),
     Vector3.new(-277.8, -99.3, -74.7),
     Vector3.new(-296.8, -97.0, -62.8),
-    Vector3.new(-296.0, -97.6, -63.2),
     Vector3.new(-303.0, -95.1, -59.8),
     Vector3.new(-317.4, -95.0, -56.2),
     Vector3.new(-328.1, -91.7, -54.5),
     Vector3.new(-338.3, -91.0, -51.2),
     Vector3.new(-343.3, -91.0, -43.2),
-    Vector3.new(-338.8, -91.0, -50.5),
-    Vector3.new(-343.9, -91.0, -42.1),
-    Vector3.new(-339.3, -91.0, -49.8),
-    Vector3.new(-344.0, -91.0, -42.2),
-    Vector3.new(-339.5, -91.0, -49.6),
-    Vector3.new(-343.6, -91.0, -43.0),
-    Vector3.new(-339.8, -91.0, -49.1),
-    Vector3.new(-344.1, -91.0, -42.1),
-    Vector3.new(-339.5, -91.0, -49.7),
-    Vector3.new(-344.5, -91.0, -41.6),
-    Vector3.new(-339.9, -91.0, -49.1),
     Vector3.new(-335.3, -91.0, -60.2),
     Vector3.new(-330.5, -91.0, -72.5),
     Vector3.new(-327.3, -90.1, -85.3),
@@ -860,19 +667,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-254.6, -71.1, -78.1),
     Vector3.new(-244.5, -71.7, -75.2),
     Vector3.new(-235.7, -71.7, -75.1),
-    Vector3.new(-239.3, -71.7, -80.4),
-    Vector3.new(-240.7, -71.7, -75.0),
-    Vector3.new(-234.8, -71.7, -75.8),
-    Vector3.new(-238.9, -71.7, -81.3),
-    Vector3.new(-244.2, -71.7, -75.9),
-    Vector3.new(-236.6, -71.7, -74.1),
-    Vector3.new(-238.2, -71.7, -80.8),
-    Vector3.new(-242.7, -71.7, -75.3),
-    Vector3.new(-235.9, -71.7, -73.8),
-    Vector3.new(-239.5, -71.7, -80.0),
-    Vector3.new(-240.7, -71.7, -74.3),
-    Vector3.new(-235.4, -71.7, -76.6),
-    Vector3.new(-239.4, -71.7, -80.2),
     Vector3.new(-251.4, -71.4, -80.5),
     Vector3.new(-261.9, -71.3, -82.4),
     Vector3.new(-269.6, -70.1, -84.8),
@@ -971,16 +765,6 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-706.5, -67.9, 210.5),
     Vector3.new(-716.2, -68.2, 208.1),
     Vector3.new(-723.3, -67.3, 211.0),
-    Vector3.new(-715.5, -68.2, 207.8),
-    Vector3.new(-723.9, -67.2, 211.3),
-    Vector3.new(-714.9, -68.2, 207.6),
-    Vector3.new(-723.6, -67.2, 211.3),
-    Vector3.new(-714.8, -68.2, 207.7),
-    Vector3.new(-724.3, -67.1, 211.6),
-    Vector3.new(-714.9, -68.2, 207.7),
-    Vector3.new(-723.8, -67.1, 211.5),
-    Vector3.new(-715.6, -68.2, 208.1),
-    Vector3.new(-726.3, -67.0, 212.7),
     Vector3.new(-729.2, -65.6, 219.6),
     Vector3.new(-733.4, -63.1, 226.8),
     Vector3.new(-739.8, -62.7, 231.0),
@@ -1073,8 +857,28 @@ local function LoadTweensConfig_CreateVisuals()
     Vector3.new(-157.9, -18.6, -121.8),
     Vector3.new(-154.7, -26.7, -121.2),
     Vector3.new(-149.5, -33.9, -119.1)
+}
+
+local function LoadTweensConfig_CreateVisuals()
+    local groups = {
+        {
+            Vector3.new(-126.3696, -31.9996, -193.4935),
+            Vector3.new(-125.4963, -27.6570, -197.6518),
+            Vector3.new(-125.5180, -20.3162, -197.8057),
+            Vector3.new(-124.5315, -6.9844, -207.8662),
+        },
+        {
+            Vector3.new(-202.3378, 4.8070, -622.1143),
+            Vector3.new(-206.2624, 17.9093, -624.6749),
+            Vector3.new(-210.2882, 22.7560, -625.7983),
+        },
+        {
+            Vector3.new(-52.6669, -120.2267, -393.7919),
+            Vector3.new(-45.2733, -95.8739, -384.5992),
+            Vector3.new(-43.7066, -89.2775, -380.1008),
+        }
     }
-    }
+
     local oldFolder = workspace:FindFirstChild("RedSticks")
     if oldFolder then oldFolder:Destroy() end
 
@@ -1087,48 +891,36 @@ local function LoadTweensConfig_CreateVisuals()
         end
     end
 
-    local success, raw = pcall(function() return readfile("TweensCFG1.json") end)
-    if not success then
-        _G.walkPts = _G.walkPts or {}
-        return
-    end
-
-    local ok, data = pcall(function() return httpservice:JSONDecode(raw) end)
-    if not ok or not data or not data.position then
-        _G.walkPts = _G.walkPts or {}
-        return
-    end
-
-    local out = {}
+    -- ИСПОЛЬЗУЕМ ВСТРОЕННЫЕ ТОЧКИ ВМЕСТО ФАЙЛА
+    _G.walkPts = BUILT_IN_POINTS
+    
+    -- Создаем визуальные точки
     local folder2 = Instance.new("Folder", workspace)
     folder2.Name = "WalkerSpheres"
-    for i, p in ipairs(data.position) do
-        local vec = Vector3.new(p.X, p.Y, p.Z)
-        out[#out + 1] = vec
+    for i, point in ipairs(BUILT_IN_POINTS) do
         local part = Instance.new("Part", folder2)
         part.Shape = Enum.PartType.Ball
         part.Anchored = true
         part.CanCollide = false
         part.Size = Vector3.new(1.5, 1.5, 1.5)
-        part.Position = vec
-        part.Color = Color3.new(1, 0, 0)
+        part.Position = point
+        part.Color = Color3.new(1, 0.4, 0.7) -- Розовый цвет
         part.Transparency = 0.25
         part.Name = "WalkerDot_" .. i
     end
-    _G.walkPts = out
 end
 
+-- УЛУЧШЕННАЯ ХОДЬБА
 local function StartWalkingLoop()
     local lp = game:GetService("Players").LocalPlayer
     local humRef = (lp.Character or lp.CharacterAdded:Wait()):WaitForChild("Humanoid")
     humRef.WalkSpeed = 16
     
-    -- Переменные для отслеживания состояния
     local currentWaypointIndex = 1
     local isStuck = false
     local lastPosition = nil
     local stuckCheckCounter = 0
-    local MAX_STUCK_CHECKS = 10 -- Максимум проверок застревания перед возвратом
+    local MAX_STUCK_CHECKS = 5
     
     task.spawn(function()
         while true do
@@ -1149,11 +941,11 @@ local function StartWalkingLoop()
             -- Проверка застревания
             if lastPosition then
                 local distanceMoved = (currentPos - lastPosition).Magnitude
-                if distanceMoved < 2 then -- Мало переместились
+                if distanceMoved < 2 then
                     stuckCheckCounter = stuckCheckCounter + 1
                     if stuckCheckCounter >= MAX_STUCK_CHECKS then
                         isStuck = true
-                        print("⚠️ Обнаружено застревание! Возвращаюсь на маршрут...")
+                        print("⚠️ Застрял! Возвращаюсь на маршрут...")
                     end
                 else
                     stuckCheckCounter = 0
@@ -1162,45 +954,63 @@ local function StartWalkingLoop()
             end
             lastPosition = currentPos
             
-            -- Если застрял, возвращаемся к предыдущей точке
+            local targetPos = _G.walkPts[currentWaypointIndex]
+            local distance = (currentPos - targetPos).Magnitude
+            
             if isStuck then
+                -- Пытаемся вернуться на маршрут
                 print("🔄 Возврат к точке " .. currentWaypointIndex)
-                local targetPos = _G.walkPts[currentWaypointIndex]
                 humRef:MoveTo(targetPos)
                 
-                -- Ждём достижения точки или таймаута
-                local moveFinished = false
-                local timeout = 10 -- секунд максимум
+                local moveSuccess = false
+                local timeout = 8
                 local startTime = tick()
                 
-                humRef.MoveToFinished:Wait()
-                moveFinished = true
+                while tick() - startTime < timeout and not moveSuccess do
+                    local currentDistance = (rootPart.Position - targetPos).Magnitude
+                    if currentDistance < 5 then
+                        moveSuccess = true
+                        break
+                    end
+                    task.wait(0.5)
+                end
                 
-                -- Если успешно дошли, сбрасываем флаг застревания
-                if moveFinished then
+                if moveSuccess then
                     isStuck = false
                     stuckCheckCounter = 0
-                    print("✅ Успешно вернулся на маршрут!")
-                    -- Переходим к следующей точке
+                    print("✅ Вернулся на маршрут!")
                     currentWaypointIndex = currentWaypointIndex + 1
                     if currentWaypointIndex > #_G.walkPts then
                         currentWaypointIndex = 1
                     end
+                else
+                    -- Пропускаем проблемную точку
+                    print("🚫 Пропускаем точку " .. currentWaypointIndex)
+                    currentWaypointIndex = currentWaypointIndex + 1
+                    if currentWaypointIndex > #_G.walkPts then
+                        currentWaypointIndex = 1
+                    end
+                    isStuck = false
+                    stuckCheckCounter = 0
                 end
             else
-                -- Нормальное движение по точкам
-                local targetPos = _G.walkPts[currentWaypointIndex]
-                local distance = (currentPos - targetPos).Magnitude
-                
+                -- Нормальное движение
                 humRef:MoveTo(targetPos)
                 
-                -- Ждём завершения движения или близкого расстояния
-                local success = pcall(function()
-                    humRef.MoveToFinished:Wait()
-                end)
+                local moveSuccess = false
+                local timeout = 15
+                local startTime = tick()
                 
-                -- Если движение завершено успешно или мы близко к точке
-                if success or distance < 5 then
+                while tick() - startTime < timeout and not moveSuccess do
+                    local currentDistance = (rootPart.Position - targetPos).Magnitude
+                    if currentDistance < 4 then
+                        moveSuccess = true
+                        break
+                    end
+                    task.wait(0.5)
+                end
+                
+                if moveSuccess or distance < 5 then
                     currentWaypointIndex = currentWaypointIndex + 1
                     if currentWaypointIndex > #_G.walkPts then
                         currentWaypointIndex = 1
@@ -1243,14 +1053,14 @@ Tabs.FarmGold:CreateButton({
 })
 
 Tabs.FarmGold:CreateButton({
-    Title = "Load Tween Config (TweensCFG1.json)",
+    Title = "Load Tween Config (Встроенные точки)",
     Callback = function()
         pcall(LoadTweensConfig_CreateVisuals)
     end
 })
 
 Tabs.FarmGold:CreateButton({
-    Title = "Start Walking (use after Load Config)",
+    Title = "Start Walking",
     Callback = function()
         pcall(StartWalkingLoop)
     end
